@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bureau des Espèces Protégées</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #2980b9;
+        }
+        .office {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 8px;
+        }
+        .office h3 {
+            color: #34495e;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .file-container {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .file-item {
+            margin: 5px;
+            padding: 10px;
+            background-color: #dfe6e9;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            width: 250px;
+        }
+        .file-item button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .file-item button:hover {
+            background-color: #c0392b;
+        }
+        button {
+            background-color: #2980b9;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin: 20px auto;
+        }
+        button:hover {
+            background-color: #1e6a8b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>مكنب الأصناف المحمية و الصيد و النشاطات الصيدية</h2>
+
+        <div class="office">
+            <h3>Documents du Bureau des Espèces Protégées</h3>
+            <input type="file" id="file8" multiple onchange="handleFileSelect(event)">
+            <div class="file-container" id="file8-container"></div>
+        </div>
+
+        <button onclick="saveFiles()">Enregistrer les Fichiers</button>
+    </div>
+
+    <script>
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            const fileContainer = document.getElementById('file8-container');
+            fileContainer.innerHTML = ""; // Clear previous files
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileItem = document.createElement('div');
+                fileItem.classList.add('file-item');
+                
+                const fileName = document.createElement('span');
+                fileName.textContent = file.name;
+                fileItem.appendChild(fileName);
+
+                const fileURL = URL.createObjectURL(file);
+                let fileLink;
+
+                // Check if the file is an image
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = fileURL;
+                    img.style.maxWidth = '100px'; // Set max width for images
+                    fileItem.appendChild(img);
+                } 
+                // Check if the file is a PDF
+                else if (file.type === 'application/pdf') {
+                    fileLink = document.createElement('a');
+                    fileLink.href = fileURL;
+                    fileLink.target = '_blank';
+                    fileLink.textContent = "Cliquez ici pour ouvrir le PDF";
+                    fileItem.appendChild(fileLink);
+                }
+
+                // Add a delete button
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Supprimer';
+                deleteButton.onclick = function() {
+                    fileItem.remove(); // Remove the file item
+                };
+                fileItem.appendChild(deleteButton);
+
+                // Add file item to the container
+                fileContainer.appendChild(fileItem);
+            }
+        }
+
+        function saveFiles() {
+            const fileContainer = document.getElementById('file8-container');
+            const fileItems = fileContainer.getElementsByClassName('file-item');
+
+            // Here you would save your files (this is just a mock-up)
+            if (fileItems.length === 0) {
+                alert("Aucun fichier à enregistrer.");
+            } else {
+                alert(fileItems.length + " fichier(s) enregistré(s).");
+            }
+        }
+    </script>
+
+</body>
+</html>

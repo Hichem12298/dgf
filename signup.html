@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Inscription et Connexion - Conservation des forêts</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef3f7;
+      margin: 0;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      text-align: center;
+      color: #2e6da4;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #2e6da4;
+      color: white;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #245b8e;
+    }
+
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 15px;
+      color: #2e6da4;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .message {
+      text-align: center;
+      color: green;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Créer un compte</h2>
+  <form method="post" action="inscription.php">
+    <input type="text" name="nom" placeholder="Nom" required>
+    <input type="text" name="prenom" placeholder="Prénom" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="mot_de_passe" placeholder="Mot de passe" required>
+    <button type="submit">S'inscrire</button>
+  </form>
+
+  <!-- Formulaire de connexion -->
+  <h2>Se connecter</h2>
+  <form method="post" action="inscription.php">
+    <input type="email" name="email_connexion" placeholder="Email" required>
+    <input type="password" name="mot_de_passe_connexion" placeholder="Mot de passe" required>
+    <button type="submit" name="connexion">Se connecter</button>
+  </form>
+
+  <a href="signup.html">Pas encore inscrit ? Créer un compte</a>
+
+  <!-- Message de confirmation après l'inscription -->
+  <?php if (isset($_GET['success'])): ?>
+    <div class="message">
+      Votre demande a été envoyée à l’administrateur. En attente de validation.
+    </div>
+  <?php endif; ?>
+</div>
+
+</body>
+</html>

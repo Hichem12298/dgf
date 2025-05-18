@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentification</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .auth-container {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      text-align: center;
+    }
+
+    .auth-container h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .auth-container input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .auth-container button {
+      width: 100%;
+      padding: 10px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .auth-container button:hover {
+      background-color: #2980b9;
+    }
+
+    .auth-container .link {
+      margin-top: 10px;
+      display: block;
+      color: #3498db;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .auth-container .link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <h2>Authentification</h2>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Mot de passe" required>
+    <button onclick="login()">Se connecter</button>
+    <a href="sinscrire.html" class="link">Créer un compte</a>
+  </div>
+
+  <script>
+    async function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch('connexion.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          alert('Connexion réussie !');
+          localStorage.setItem('currentUser', JSON.stringify(result.user));
+          window.location.href = 'website.html';
+        } else {
+          alert(result.error);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la connexion :', error);
+        alert('Une erreur est survenue. Veuillez réessayer.');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bureau d'Inventaire de Ghabiya</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #2980b9;
+        }
+        .office {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 8px;
+        }
+        .office h3 {
+            color: #34495e;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .file-container {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #2980b9;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin: 20px auto;
+        }
+        button:hover {
+            background-color: #1e6a8b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>مكتب الجرد و التهيئة و المنتوجات</h2>
+
+        <div class="office">
+            <h3>Documents du Bureau d'Inventaire de Ghabiya</h3>
+            <input type="file" id="file4" onchange="handleFileSelect(event, 'file4')">
+            <div class="file-container" id="file4-container"></div>
+        </div>
+
+        <button>Enregistrer les Fichiers</button>
+    </div>
+
+    <script>
+        function handleFileSelect(event, fileId) {
+            const file = event.target.files[0];
+            const fileContainer = document.getElementById(fileId + '-container');
+            fileContainer.innerHTML = "";
+            
+            if (file) {
+                const fileURL = URL.createObjectURL(file);
+                const fileName = file.name;
+                let fileLink;
+                
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = fileURL;
+                    fileContainer.appendChild(img);
+                } else if (file.type === 'application/pdf') {
+                    fileLink = document.createElement('a');
+                    fileLink.href = fileURL;
+                    fileLink.target = '_blank';
+                    fileLink.textContent = "Cliquez ici pour ouvrir le PDF";
+                }
+                
+                if (fileLink) {
+                    fileContainer.appendChild(fileLink);
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+# Exclude sensitive files
+config.php
+db.php
+*.sql

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajout Donnée Dendrométrique</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0f7fa, #80deea);
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            color: #004d40;
+            margin-bottom: 20px;
+        }
+
+        form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border-color: #26a69a;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background-color: #00796b;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #004d40;
+        }
+
+        .secondary-btn {
+            background-color: #546e7a;
+            margin-top: 20px;
+        }
+
+        .secondary-btn:hover {
+            background-color: #37474f;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Ajouter une donnée dendrométrique</h2>
+
+    <form action="insert_dendometrique.php" method="POST">
+        <input type="text" name="espece" placeholder="Espèce de l'arbre" required>
+        <input type="number" step="0.01" name="diametre" placeholder="Diamètre (cm)" required>
+        <input type="number" step="0.01" name="hauteur" placeholder="Hauteur (m)" required>
+        <input type="text" name="localisation" placeholder="Localisation" required>
+        <button type="submit">Enregistrer</button>
+    </form>
+
+    <button class="secondary-btn" onclick="window.location.href='voir_donnees.php'">Voir les données</button>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', async function (e) {
+            e.preventDefault(); // Empêcher le rechargement de la page
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('insert_dendometrique.php', {
+                    method: 'POST',
+                    body: formData // Envoyer les données directement sans JSON.stringify
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('Donnée ajoutée avec succès !');
+                    this.reset(); // Réinitialiser le formulaire
+                } else {
+                    alert('Erreur : ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erreur lors de l\'envoi des données :', error);
+                alert('Une erreur est survenue. Veuillez réessayer.');
+            }
+        });
+    </script>
+
+</body>
+</html>

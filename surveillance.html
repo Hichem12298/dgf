@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Surveillance des Espèces</title>
+  <style>
+    body {
+      background-image: url('thumb_automne-chemin-foret-dourdan-01.jpg');
+      background-repeat: no-repeat;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+      color: white;
+      text-align: center;
+    }
+
+    .form-container {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+
+    input[type="text"], input[type="number"], input[type="date"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 15px 20px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .notification {
+      padding: 10px;
+      margin-top: 20px;
+      color: white;
+      background-color: #f44336;
+      border-radius: 5px;
+      display: none;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h1>Surveillance des Espèces</h1>
+    <p>Veuillez entrer les informations de l'espèce.</p>
+
+    <!-- Formulaire de surveillance des espèces -->
+    <form id="surveillanceForm">
+      <label for="speciesName">Nom de l'espèce :</label>
+      <input type="text" id="speciesName" placeholder="Nom scientifique de l'espèce" required />
+
+      <label for="speciesLocation">Localisation :</label>
+      <input type="text" id="speciesLocation" placeholder="Emplacement de l'espèce" required />
+
+      <label for="speciesHeight">Hauteur (en mètres) :</label>
+      <input type="number" id="speciesHeight" placeholder="Hauteur de l'espèce" required />
+
+      <label for="speciesWidth">Largeur (en mètres) :</label>
+      <input type="number" id="speciesWidth" placeholder="Largeur de l'espèce" required />
+
+      <label for="speciesArea">Superficie (en m²) :</label>
+      <input type="number" id="speciesArea" placeholder="Superficie de l'espèce" required />
+
+      <label for="speciesDate">Date d'observation :</label>
+      <input type="date" id="speciesDate" required />
+
+      <button type="submit">Enregistrer les données</button>
+    </form>
+
+    <div id="notification" class="notification">
+      Les données ont été modifiées !
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('surveillanceForm');
+    const notification = document.getElementById('notification');
+
+    let lastData = JSON.parse(localStorage.getItem('surveillanceData')) || {};
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      // Récupérer les données du formulaire
+      const speciesName = document.getElementById('speciesName').value;
+      const speciesLocation = document.getElementById('speciesLocation').value;
+      const speciesHeight = document.getElementById('speciesHeight').value;
+      const speciesWidth = document.getElementById('speciesWidth').value;
+      const speciesArea = document.getElementById('speciesArea').value;
+      const speciesDate = document.getElementById('speciesDate').value;
+
+      const currentData = {
+        speciesName,
+        speciesLocation,
+        speciesHeight,
+        speciesWidth,
+        speciesArea,
+        speciesDate,
+      };
+
+      // Vérifier si les données ont changé
+      let hasChanged = false;
+      for (let key in currentData) {
+        if (currentData[key] !== (lastData[key] || '')) {
+          hasChanged = true;
+          break;
+        }
+      }
+
+      if (hasChanged) {
+        // Afficher la notification
+        notification.style.display = 'block';
+
+        // Enregistrer les nouvelles données dans le localStorage
+        localStorage.setItem('surveillanceData', JSON.stringify(currentData));
+      }
+
+      // Si les données n'ont pas changé
+      else {
+        alert('Aucune modification détectée.');
+      }
+    });
+  </script>
+
+</body>
+</html>

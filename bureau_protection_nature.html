@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bureau de Protection de la Nature</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #2980b9;
+        }
+        .office {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 8px;
+        }
+        .office h3 {
+            color: #34495e;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .file-container {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .file-item {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e2e2e2;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        button {
+            background-color: #2980b9;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin: 20px auto;
+        }
+        button:hover {
+            background-color: #1e6a8b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2> مكتب الوقاية و مقاومة الحرائق و الأمراض الطفيلية </h2>
+
+        <div class="office">
+            <h3>Documents du Bureau de Protection de la Nature</h3>
+            <input type="file" id="file7" multiple onchange="handleFileSelect(event)">
+            <div class="file-container" id="file7-container"></div>
+        </div>
+
+        <button onclick="saveFiles()">Enregistrer les Fichiers</button>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+
+        function handleFileSelect(event) {
+            const fileInput = event.target;
+            const fileContainer = document.getElementById('file7-container');
+            fileContainer.innerHTML = ""; // Clear previous files
+
+            // Clear the array for new files
+            selectedFiles = Array.from(fileInput.files);
+            
+            // Display selected files
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>${file.name}</span>
+                    <button onclick="downloadFile(${index})">Télécharger</button>
+                `;
+                fileContainer.appendChild(fileItem);
+            });
+        }
+
+        function saveFiles() {
+            if (selectedFiles.length === 0) {
+                alert("Aucun fichier à enregistrer.");
+                return;
+            }
+            
+            // Code to handle file saving (for now, just log them)
+            alert(`Enregistrement des fichiers: ${selectedFiles.map(file => file.name).join(', ')}`);
+        }
+
+        function downloadFile(index) {
+            const file = selectedFiles[index];
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(file);
+            a.download = file.name; // Set the file name for download
+            a.click(); // Trigger the download
+        }
+    </script>
+
+</body>
+</html>

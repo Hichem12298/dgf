@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestion des 11 Entités</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      padding: 20px;
+      color: #333;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    form, .entite-section {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      max-width: 800px;
+      margin: 20px auto;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      margin-top: 20px;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background: #f8f9fa;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    .delete-btn {
+      background: #e74c3c;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .delete-btn:hover {
+      background: #c0392b;
+    }
+
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Gestion des Entités</h1>
+
+<form id="formEntite" class="form-container">
+  <div class="form-group">
+    <label for="type">Sélectionner une entité :</label>
+    <select id="type" required>
+      <option value="">-- Choisir --</option>
+      <option value="espece">Espèce</option>
+      <option value="foret">Forêt</option>
+      <option value="canton">Canton</option>
+      <option value="conservation">Conservation</option>
+      <option value="circonscription">Circonscription</option>
+      <option value="district">District</option>
+      <option value="agent">Agent de récolte</option>
+      <option value="analyste">Analyste</option>
+      <option value="analyse">Analyse</option>
+      <option value="operation">Opération de récolte</option>
+      <option value="donnee">Donnée dendrométrique</option>
+    </select>
+  </div>
+
+  <div id="dynamic-fields"></div>
+
+  <div class="form-actions">
+    <button type="submit">Ajouter</button>
+  </div>
+</form>
+
+<div class="entite-section">
+  <h2>Données enregistrées</h2>
+  <table id="tableEntites">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Données</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+  const form = document.getElementById('formEntite');
+  const typeSelect = document.getElementById('type');
+  const fieldsContainer = document.getElementById('dynamic-fields');
+  const tableBody = document.querySelector('#tableEntites tbody');
+
+  const fieldTemplates = {
+    espece: ['nom'],
+    foret: ['nom', 'superficie'],
+    canton: ['nom', 'id_foret'],
+    conservation: ['nom', 'adresse', 'conservateur'],
+    circonscription: ['nom', 'adresse'],
+    district: ['nom', 'adresse'],
+    agent: ['nom', 'prenom', 'email'],
+    analyste: ['nom', 'prenom', 'email'],
+    analyse: ['date'],
+    operation: ['nom', 'description'],
+    donnee: ['hauteur', 'diametre', 'volume']
+  };
+
+  // Charger les données depuis la base de données et les afficher dans un tableau organisé
+  async function fetchEntites() {
+    try {
+      const response = await fetch('fetch_data.php');
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des données.');
+      }
+      const entites = await response.json();
+
+      tableBody.innerHTML = '';
+      if (entites.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="3">Aucune donnée enregistrée.</td></tr>';
+        return;
+      }
+
+      entites.forEach(entite => {
+        console.log('Données reçues pour chaque entité:', entite); // Journal pour vérifier les données reçues
+
+        // Vérifier si l'entité contient un ID valide
+        if (!entite.data.id) {
+          console.error('ID manquant pour l\'entité:', entite);
+          return;
+        }
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${entite.type}</td>
+          <td>${Object.entries(entite.data).map(([key, val]) => `<strong>${key}</strong>: ${val}`).join('<br>')}</td>
+          <td>
+            <button class="delete-btn" onclick="supprimerEntite(${entite.data.id}, '${entite.type}')">Supprimer</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données:', error);
+      tableBody.innerHTML = '<tr><td colspan="3">Erreur lors du chargement des données.</td></tr>';
+    }
+  }
+
+  // Supprimer une entité
+  async function supprimerEntite(id, type) {
+    try {
+      const response = await fetch('supprimer.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, type })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la suppression de l\'entité.');
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        fetchEntites(); // Recharger les données après suppression
+      } else {
+        alert(result.error || 'Erreur lors de la suppression.');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression de l\'entité:', error);
+      alert('Une erreur est survenue lors de la suppression.');
+    }
+  }
+
+  // Ajouter dynamiquement les champs en fonction du type sélectionné
+  typeSelect.addEventListener('change', async () => {
+    fieldsContainer.innerHTML = '';
+    const fields = fieldTemplates[typeSelect.value] || [];
+
+    for (const field of fields) {
+      if (typeSelect.value === 'canton' && field === 'id_foret') {
+        const label = document.createElement('label');
+        label.textContent = 'Forêt :';
+        const select = document.createElement('select');
+        select.name = 'id_foret';
+        select.required = true;
+
+        try {
+          const response = await fetch('fetch_forets.php');
+          if (!response.ok) {
+            throw new Error('Erreur lors de la récupération des forêts.');
+          }
+          const forets = await response.json();
+
+          forets.forEach(foret => {
+            const option = document.createElement('option');
+            option.value = foret.id;
+            option.textContent = foret.nom;
+            select.appendChild(option);
+          });
+        } catch (error) {
+          console.error('Erreur lors de la récupération des forêts:', error);
+          const errorMessage = document.createElement('p');
+          errorMessage.textContent = 'Impossible de charger les forêts.';
+          errorMessage.style.color = 'red';
+          fieldsContainer.appendChild(errorMessage);
+        }
+
+        fieldsContainer.appendChild(label);
+        fieldsContainer.appendChild(select);
+      } else {
+        const label = document.createElement('label');
+        label.textContent = field.charAt(0).toUpperCase() + field.slice(1) + ':';
+        const input = document.createElement('input');
+        input.placeholder = field.charAt(0).toUpperCase() + field.slice(1);
+        input.name = field;
+        input.type = (field === 'email') ? 'email' : (field === 'date') ? 'date' : 'text';
+        input.required = true;
+
+        fieldsContainer.appendChild(label);
+        fieldsContainer.appendChild(input);
+      }
+    }
+  });
+
+  // Ajouter une nouvelle entité dans la base de données
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const type = typeSelect.value;
+    const inputs = fieldsContainer.querySelectorAll('input, select');
+    const data = {};
+    inputs.forEach(input => data[input.name] = input.value);
+
+    try {
+      const response = await fetch('insert.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, data })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'ajout de l\'entité.');
+      }
+
+      const result = await response.json();
+      if (result.message) {
+        console.log(result.message);
+        fetchEntites(); // Recharger les données après l'ajout
+        form.reset();
+        fieldsContainer.innerHTML = '';
+      } else {
+        console.error('Erreur:', result.error);
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de l\'entité:', error);
+      alert('Une erreur est survenue lors de l\'ajout.');
+    }
+  });
+
+  // Charger les données au chargement de la page
+  fetchEntites();
+</script>
+
+</body>
+</html>

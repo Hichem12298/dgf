@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحميل الملفات للمصالح والمكاتب</title>
+    <style>
+        /* Réinitialisation des marges et padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            direction: rtl;
+            background-color: #f5f5f5;
+            color: #333;
+            text-align: center;
+            padding-top: 50px;
+        }
+
+        h2 {
+            font-size: 32px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 1000px;
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+
+        .section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h3 {
+            font-size: 26px;
+            color: #34495e;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .office {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .office h4 {
+            font-size: 22px;
+            color: #16a085;
+            margin-bottom: 10px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+
+        .file-container {
+            margin-top: 20px;
+        }
+
+        a {
+            color: #3498db;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .file-container img {
+            max-width: 300px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .delete-btn {
+            background-color: red;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>تحميل الملفات للمصالح والمكاتب</h2>
+
+    <div class="container">
+        <!-- Section des bureaux -->
+        <div class="section">
+            <h3>مصلحة تسيير الثروة الغابية الدراسات و البرامج</h3>
+            
+           
+           <div class="office">
+                    <h4>مكتب الدراسات و البرامج</h4>
+                <input type="file" id="file2" multiple onchange="handleFileSelect(event, 'file2')">
+                <div class="file-container" id="file2-container"></div>
+            </div>
+        </div>
+
+        <!-- Bouton pour sauvegarder les fichiers -->
+        <button onclick="saveFiles()">حفظ الملفات</button>
+    </div>
+
+    <script>
+        // Fonction pour gérer l'affichage des fichiers sélectionnés
+        function handleFileSelect(event, fileId) {
+            const files = event.target.files;
+            const fileContainer = document.getElementById(fileId + '-container');
+            fileContainer.innerHTML = "";  // Réinitialiser la zone d'affichage
+
+            // Vérification de la présence de fichiers
+            if (files.length) {
+                for (const file of files) {
+                    const fileURL = URL.createObjectURL(file);
+ 
