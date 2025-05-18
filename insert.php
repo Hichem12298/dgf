@@ -1,75 +1,50 @@
 <?php
 header('Content-Type: application/json');
-
 require 'db.php';
 
-// Récupérer les données envoyées
-$data = json_decode(file_get_contents('php://input'), true);
-$type = $data['type'];
-$entiteData = $data['data'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $type = $data['type'] ?? '';
+    $fields = $data['data'] ?? [];
 
-// Préparer la requête SQL en fonction du type d'entité
-switch ($type) {
-    case 'espece':
-        $sql = "INSERT INTO Espece (nom) VALUES (?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$entiteData['nom']]);
-        break;
-    case 'foret':
-        $sql = "INSERT INTO Foret (nom, superficie) VALUES (?, ?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$entiteData['nom'], $entiteData['superficie']]);
-        break;
-    case 'canton':
-        $sql = "INSERT INTO Canton (nom, id_foret) VALUES (?, ?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$entiteData['nom'], $entiteData['id_foret']]);
-        break;
-    case 'conservation':
-        $sql = "INSERT INTO Conservation (nom, adresse, conservateur) VALUES (?, ?, ?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$entiteData['nom'], $entiteData['adresse'], $entiteData['conservateur']]);
-        break;
-    case 'circonscription':
-        $sql = "INSERT INTO Circonscription (nom, adresse) VALUES (?, ?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$entiteData['nom'], $entiteData['adresse']]);
-        break;
-    case 'district':
-        $sql = "INSERT INTO District (nom, adresse) VALUES (?, ?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$entiteData['nom'], $entiteData['adresse']]);
-        break;
-    case 'agent':
-        $sql = "INSERT INTO Agent (nom, prenom, email) VALUES (?, ?, ?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$entiteData['nom'], $entiteData['prenom'], $entiteData['email']]);
-        break;
-    case 'analyste':
-        $sql = "INSERT INTO Analyste (nom, prenom, email) VALUES (?, ?, ?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$entiteData['nom'], $entiteData['prenom'], $entiteData['email']]);
-        break;
-    case 'analyse':
-        $sql = "INSERT INTO Analyse (date) VALUES (?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$entiteData['date']]);
-        break;
-    case 'operation':
-        $sql = "INSERT INTO Operation (nom, description) VALUES (?, ?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$entiteData['nom'], $entiteData['description']]);
-        break;
-    case 'donnee':
-        $sql = "INSERT INTO Donnee (hauteur, diametre, volume) VALUES (?, ?, ?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$entiteData['hauteur'], $entiteData['diametre'], $entiteData['volume']]);
-        break;
-    default:
-        echo json_encode(['error' => 'Type d\'entité non reconnu']);
+    // Whitelist of allowed table names
+    $allowedTables = ['espece', 'foret', 'canton', 'conservation', 'circonscription', 'district', 'agent', 'analyste', 'analyse', 'operation', 'donnee'];
+
+    if (empty($type) || empty($fields) || !in_array($type, $allowedTables)) {
+        echo json_encode(['success' => false, 'error' => 'Type invalide ou données manquantes.']);
         exit;
-}
+    }
 
-// Réponse en cas de succès
-echo json_encode(['message' => 'Entité ajoutée avec succès']);
+    try {
+        // Check if ID already exists
+        if (isset($fields['id'])) {
+            $checkSql = "SELECT COUNT(*) FROM $type WHERE id = :id";
+            $checkStmt = $pdo->prepare($checkSql);
+            $checkStmt->bindValue(':id', $fields['id']);
+            $checkStmt->execute();
+
+            if ($checkStmt->fetchColumn() > 0) {
+                echo json_encode(['success' => false, 'error' => 'L\'ID existe déjà.']);
+                exit;
+            }
+        }
+
+        $columns = implode(", ", array_keys($fields));
+        $placeholders = ":" . implode(", :", array_keys($fields));
+
+        $sql = "INSERT INTO $type ($columns) VALUES ($placeholders)";
+        $stmt = $pdo->prepare($sql);
+
+        foreach ($fields as $key => $value) {
+            $stmt->bindValue(":" . $key, $value);
+        }
+
+        $stmt->execute();
+        echo json_encode(['success' => true, 'message' => 'Données insérées avec succès.']);
+    } catch (PDOException $e) {
+        echo json_encode(['success' => false, 'error' => 'Erreur de base de données : ' . $e->getMessage()]);
+    }
+} else {
+    echo json_encode(['success' => false, 'error' => 'Méthode non autorisée.']);
+}
 ?>

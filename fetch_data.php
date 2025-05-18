@@ -1,33 +1,28 @@
 <?php
-header("Content-Type: application/json");
-
+header('Content-Type: application/json');
 require 'db.php';
 
-$results = [];
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $type = $_GET['type'] ?? '';
 
-function fetchAll($pdo, $table, $type) {
-    $stmt = $pdo->query("SELECT * FROM $table");
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    return array_map(fn($row) => ['type' => $type, 'data' => $row], $data);
-}
+    // Whitelist of allowed table names
+    $allowedTables = ['espece', 'foret', 'canton', 'conservation', 'circonscription', 'district', 'agent', 'analyste', 'analyse', 'operation', 'donnee', 'donnees_dendrometrique'];
 
-try {
-    $results = array_merge(
-        fetchAll($pdo, "espece", "espece"),
-        fetchAll($pdo, "foret", "foret"),
-        fetchAll($pdo, "canton", "canton"),
-        fetchAll($pdo, "conservation", "conservation"),
-        fetchAll($pdo, "circonscription", "circonscription"),
-        fetchAll($pdo, "district", "district"),
-        fetchAll($pdo, "agent", "agent"),
-        fetchAll($pdo, "analyste", "analyste"),
-        fetchAll($pdo, "analyse", "analyse"),
-        fetchAll($pdo, "operation", "operation"),
-        fetchAll($pdo, "donnee", "donnee")
-    );
+    if (empty($type) || !in_array($type, $allowedTables)) {
+        echo json_encode(['success' => false, 'error' => 'Type invalide ou non spécifié.']);
+        exit;
+    }
 
-    echo json_encode($results);
-} catch (PDOException $e) {
-    echo json_encode(['error' => $e->getMessage()]);
+    try {
+        $sql = "SELECT * FROM $type";
+        $stmt = $pdo->query($sql);
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode(['success' => true, 'data' => $data]);
+    } catch (PDOException $e) {
+        echo json_encode(['success' => false, 'error' => 'Erreur de base de données : ' . $e->getMessage()]);
+    }
+} else {
+    echo json_encode(['success' => false, 'error' => 'Méthode non autorisée.']);
 }
 ?>

@@ -1,25 +1,15 @@
 <?php
-$host = "localhost";
-$user = "root";
-$password = "";
-$dbname = "arbres";
+require_once 'db.php';
 
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
-    die("Erreur de connexion");
+header('Content-Type: application/json');
+
+try {
+    $sql = "SELECT id, species, diameter, height, location, date_enregistrement FROM dendometrique";
+    $stmt = $pdo->query($sql);
+    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode($data);
+} catch (PDOException $e) {
+    echo json_encode(['error' => 'Erreur lors de la récupération des données : ' . $e->getMessage()]);
 }
-
-$sql = "SELECT id, species, diameter, height, location, date_enregistrement FROM donnees_dendrometriques ORDER BY id DESC";
-$result = $conn->query($sql);
-
-$donnees = [];
-
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $donnees[] = $row;
-    }
-}
-
-echo json_encode($donnees);
-$conn->close();
 ?>

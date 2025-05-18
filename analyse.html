@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Analyse des Données</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-scatter"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -103,130 +105,89 @@
 </head>
 <body>
 
-  <h2>Analyse des superficies forestières</h2>
+  <h2>Analyse des données</h2>
 
-  <!-- Formulaire de saisie -->
-  <form id="analysisForm">
-    <label for="year">Année</label>
-    <input type="number" id="year" name="year" required placeholder="Ex : 2025" min="1900">
-
-    <label for="area">Superficie (en hectares)</label>
-    <input type="number" id="area" name="area" required placeholder="Ex : 1500" min="0">
-
-    <button type="submit">Ajouter les données</button>
-    <button type="button" class="delete-btn" onclick="clearData()">🗑️ Supprimer toutes les données</button>
-  </form>
-
-  <!-- Conteneur du graphique -->
-  <div class="chart-container">
-    <canvas id="superficieChart"></canvas>
+  <!-- Analyse des Données -->
+  <div>
+    <label for="dataSelect">Sélectionner une donnée :</label>
+    <select id="dataSelect">
+      <option value="">-- Choisir une donnée --</option>
+      <!-- Les options seront ajoutées dynamiquement -->
+    </select>
+    <button id="generateChart">Générer la courbe</button>
   </div>
 
-  <!-- Tableau des données -->
-  <table id="dataTable">
-    <thead>
-      <tr>
-        <th>Année</th>
-        <th>Superficie (ha)</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="chart-container">
+    <canvas id="dataChart"></canvas>
+  </div>
 
   <script>
-    let chart;
-    let chartData = {
-      labels: [],
-      datasets: [{
-        label: 'Superficie (hectares)',
-        data: [],
-        borderColor: '#27ae60',
-        backgroundColor: 'rgba(39, 174, 96, 0.1)',
-        borderWidth: 2,
-        pointBackgroundColor: '#2ecc71',
-        tension: 0.3
-      }]
-    };
+    async function fetchData() {
+      try {
+        const response = await fetch('voir_donnees.php');
+        const result = await response.json();
 
-    // Charger les données existantes
-    const storedData = JSON.parse(localStorage.getItem("analyses")) || [];
-
-    function updateChartAndTable() {
-      // Trier par année
-      storedData.sort((a, b) => a.year - b.year);
-
-      // Mettre à jour labels et data
-      chartData.labels = storedData.map(d => d.year);
-      chartData.datasets[0].data = storedData.map(d => d.area);
-
-      // Mettre à jour le tableau
-      const tableBody = document.querySelector("#dataTable tbody");
-      tableBody.innerHTML = "";
-      storedData.forEach(d => {
-        const row = document.createElement("tr");
-        row.innerHTML = `<td>${d.year}</td><td>${d.area}</td>`;
-        tableBody.appendChild(row);
-      });
-
-      // Mettre à jour le graphique
-      chart.update();
+        if (result.success) {
+          const dataSelect = document.getElementById('dataSelect');
+          result.data.forEach(row => {
+            const option = document.createElement('option');
+            option.value = JSON.stringify(row);
+            option.textContent = `Espèce: ${row.espece}, Diamètre: ${row.diametre}, Hauteur: ${row.hauteur}, Superficie: ${row.superficie}`;
+            dataSelect.appendChild(option);
+          });
+        } else {
+          alert('Erreur : ' + result.error);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des données :', error);
+        alert('Impossible de charger les données.');
+      }
     }
 
-    // Initialiser le graphique
-    const ctx = document.getElementById("superficieChart").getContext("2d");
-    chart = new Chart(ctx, {
-      type: 'line',
-      data: chartData,
-      options: {
-        responsive: true,
-        scales: {
-          y: {
+    document.getElementById('generateChart').addEventListener('click', () => {
+      const selectedData = document.getElementById('dataSelect').value;
+      if (!selectedData) {
+        alert('Veuillez sélectionner une donnée.');
+        return;
+      }
+
+      const parsedData = JSON.parse(selectedData);
+
+      const ctx = document.getElementById('dataChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Diamètre', 'Hauteur', 'Superficie'],
+          datasets: [{
+            label: `Analyse pour ${parsedData.espece}`,
+            data: [parsedData.diametre, parsedData.hauteur, parsedData.superficie],
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top'
+            },
             title: {
               display: true,
-              text: 'Superficie (ha)'
+              text: 'Courbe d’Analyse des Données'
             }
           },
-          x: {
-            title: {
-              display: true,
-              text: 'Année'
+          scales: {
+            y: {
+              beginAtZero: true
             }
           }
-        },
-        plugins: {
-          legend: {
-            display: true,
-            position: 'top'
-          }
         }
-      }
+      });
     });
 
-    // Formulaire : ajout de données
-    document.getElementById("analysisForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-
-      const year = parseInt(document.getElementById("year").value);
-      const area = parseFloat(document.getElementById("area").value);
-
-      storedData.push({ year, area });
-      localStorage.setItem("analyses", JSON.stringify(storedData));
-
-      document.getElementById("analysisForm").reset();
-      updateChartAndTable();
-    });
-
-    // Supprimer toutes les données
-    function clearData() {
-      if (confirm("Voulez-vous vraiment supprimer toutes les données ?")) {
-        localStorage.removeItem("analyses");
-        storedData.length = 0;
-        updateChartAndTable();
-      }
-    }
-
-    // Premier affichage
-    updateChartAndTable();
+    // Charger les données au chargement de la page
+    window.onload = fetchData;
   </script>
 
 </body>

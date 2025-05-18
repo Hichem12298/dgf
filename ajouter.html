@@ -1,128 +1,104 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ajouter un utilisateur</title>
   <style>
     body {
-      background-image: url('thumb_automne-chemin-foret-dourdan-01.jpg');
-      background-repeat: no-repeat;
-      background-size: cover;
-      height: 100vh;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to right, #f39c12, #f1c40f);
       margin: 0;
-      font-family: Arial, sans-serif;
-      color: white;
-    }
-    .form-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
+      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
+      height: 100vh;
     }
-    .form-box {
-      background-color: #2c3e50;
-      padding: 30px;
-      border-radius: 10px;
-      width: 300px;
+    .container {
+      width: 350px;
+      padding: 25px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    h2 {
       text-align: center;
+      color: #e67e22;
+      margin-bottom: 20px;
     }
-    input, select {
+    input, select, button {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       margin: 10px 0;
-      border-radius: 5px;
-      border: none;
-      background-color: #34495e;
-      color: white;
+      border-radius: 6px;
+      border: 1px solid #ddd;
       font-size: 16px;
     }
     button {
-      padding: 10px;
-      background-color: #2c3e50;
+      background-color: #e67e22;
       color: white;
-      border-radius: 5px;
-      width: 100%;
-      font-size: 16px;
+      border: none;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s ease;
     }
     button:hover {
-      background-color: #1abc9c;
-    }
-    .back-btn {
-      margin-top: 15px;
-      background-color: #e74c3c;
+      background-color: #d35400;
     }
   </style>
 </head>
 <body>
-
-<div class="form-container">
-  <div class="form-box">
+  <div class="container">
     <h2>Ajouter un utilisateur</h2>
-    <input type="text" id="nom" placeholder="Nom" required>
-    <input type="text" id="prenom" placeholder="Prénom" required>
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Mot de passe" required>
-    
-    <!-- Sélection du rôle -->
-    <select id="role" required>
-      <option value="" disabled selected>Choisir le rôle</option>
-      <option value="admin">Administrateur</option>
-      <option value="agentrecolte">Agent de récolte</option>
-      <option value="analyste">Analyste</option>
-      <option value="employe">Employé de surveillance</option>
-      <option value="public">Public</option>
-      <option value="agentconservation">Agent de conservation</option>
-    </select>
-
-    <button onclick="ajouterUtilisateur()">Ajouter l'utilisateur</button>
-    <button class="back-btn" onclick="location.href='admin.html'">Retour à la gestion des utilisateurs</button>
+    <form id="ajouterUtilisateurForm">
+      <input type="text" name="nom" id="nom" placeholder="Nom" required>
+      <input type="text" name="prenom" id="prenom" placeholder="Prénom" required>
+      <input type="email" name="email" id="email" placeholder="Email" required>
+      <input type="password" name="password" id="password" placeholder="Mot de passe" required>
+      <select name="role" id="role" required>
+        <option value="" disabled selected>Choisir le rôle</option>
+        <option value="admin">Administrateur</option>
+        <option value="agent">Agent</option>
+        <option value="analyste">Analyste</option>
+        <option value="conservation">Conservation</option>
+        <option value="surveillance">Surveillance</option>
+        <option value="public">Public</option>
+      </select>
+      <button type="submit">Ajouter</button>
+    </form>
   </div>
-</div>
 
-<script>
-  function ajouterUtilisateur() {
-    const nom = document.getElementById('nom').value;
-    const prenom = document.getElementById('prenom').value;
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const role = document.getElementById('role').value;
+  <script>
+    document.getElementById('ajouterUtilisateurForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
 
-    if (!nom || !prenom || !email || !password || !role) {
-      return alert("Tous les champs doivent être remplis.");
-    }
+      const nom = document.getElementById('nom').value;
+      const prenom = document.getElementById('prenom').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
 
-    // Vérifier si l'utilisateur existe déjà
-    let utilisateurs = JSON.parse(localStorage.getItem('utilisateurs')) || [];
-    if (utilisateurs.some(u => u.email === email)) {
-      return alert("Un utilisateur avec cet email existe déjà.");
-    }
+      const formData = { nom, prenom, email, password, role };
 
-    const nouvelUtilisateur = {
-      email: email,
-      password: password,
-      role: role,
-      nom: nom,
-      prenom: prenom,
-      accepte: role === 'admin' ? true : false // L'administrateur est accepté par défaut
-    };
+      try {
+        const response = await fetch('register.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
 
-    utilisateurs.push(nouvelUtilisateur);
-    localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
-
-    alert("Utilisateur ajouté avec succès !");
-    // Rediriger vers la page de gestion des utilisateurs
-    location.href = 'admin.html';
-  }
-</script>
-
+        const result = await response.json();
+        if (result.success) {
+          alert('Utilisateur ajouté avec succès !');
+          window.location.href = 'admin.html';
+        } else {
+          alert('Erreur : ' + result.message);
+        }
+      } catch (error) {
+        console.error('Erreur lors de l\'ajout de l\'utilisateur :', error);
+        alert('Une erreur est survenue. Veuillez réessayer.');
+      }
+    });
+  </script>
 </body>
 </html>

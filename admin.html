@@ -2,197 +2,142 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Panel Admin - Conservation des Forêts</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
+  <title>Admin Panel</title>
   <style>
     body {
       font-family: 'Roboto', sans-serif;
-      background: linear-gradient(to right, #1c92d2, #f2fcfe);
+      background: linear-gradient(to right, #27ae60, #2ecc71);
       margin: 0;
       padding: 0;
       color: #2c3e50;
     }
-
-    header {
-      background: linear-gradient(to right, #27ae60, #2ecc71);
-      color: white;
-      padding: 20px;
-      text-align: center;
-      font-family: 'Pacifico', cursive;
-      font-size: 2em;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 40px auto;
       padding: 30px;
       background: white;
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
-
-    h2 {
-      text-align: center;
-      color: #2980b9;
-      margin-bottom: 20px;
-    }
-
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
-
     th, td {
       padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
+      border: 1px solid #ddd;
+      text-align: center;
     }
-
     th {
-      background-color: #f2f2f2;
-      color: #2980b9;
+      background-color: #4CAF50;
+      color: white;
     }
-
-    tr:hover {
-      background-color: #f5f5f5;
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
     }
-
     button {
       padding: 8px 12px;
+      background-color: #e74c3c;
+      color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 4px;
       cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s ease;
     }
-
-    button:first-of-type {
-      background: #2ecc71;
-      color: white;
-    }
-
-    button:first-of-type:hover {
-      background: #27ae60;
-    }
-
-    button:last-of-type {
-      background: #e74c3c;
-      color: white;
-    }
-
-    button:last-of-type:hover {
-      background: #c0392b;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 50px;
-      padding: 15px;
-      background: #34495e;
-      color: white;
-      font-family: 'Pacifico', cursive;
+    button:hover {
+      background-color: #c0392b;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h2>Gestion des Utilisateurs</h2>
+    <button onclick="location.href='ajouter.html'">Ajouter un utilisateur</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Rôle</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="userTable">
+        <!-- Users will be dynamically loaded here -->
+      </tbody>
+    </table>
+  </div>
 
-<header>Administration - Conservation des Forêts</header>
-
-<div class="container">
-  <h2>Validation des utilisateurs</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Email</th>
-        <th>Rôle</th>
-        <th>Statut</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="userTable">
-      <!-- Les utilisateurs seront insérés ici dynamiquement -->
-    </tbody>
-  </table>
-</div>
-
-<footer>&copy; 2025 Conservation des forêts de Mostaganem</footer>
-
-<script>
-    // Récupérer les utilisateurs depuis le serveur
-    async function afficherUtilisateurs() {
+  <script>
+    async function fetchUsers() {
       try {
         const response = await fetch('fetch_users.php');
         const users = await response.json();
-        const table = document.getElementById('userTable');
-        table.innerHTML = '';
-
-        if (users.length === 0) {
-          table.innerHTML = '<tr><td colspan="4">Aucun utilisateur trouvé.</td></tr>';
-          return;
-        }
+        const userTable = document.getElementById('userTable');
+        userTable.innerHTML = '';
 
         users.forEach(user => {
           const row = document.createElement('tr');
           row.innerHTML = `
             <td>${user.email}</td>
             <td>${user.role}</td>
-            <td>${user.accepte ? "Validé" : "Non validé"}</td>
+            <td>${user.accepte ? 'Validé' : 'Non validé'}</td>
             <td>
-              ${user.accepte == 0 ? `<button onclick="validerUtilisateur(${user.id})">Valider</button>` : ''}
-              <button onclick="supprimerUtilisateur(${user.id})">Supprimer</button>
+              ${user.accepte === 0 ? `<button onclick="validateUser(${user.id})">Valider</button>` : ''}
+              <button onclick="deleteUser(${user.id})">Supprimer</button>
             </td>
           `;
-          table.appendChild(row);
+          userTable.appendChild(row);
         });
       } catch (error) {
-        console.error('Erreur lors de la récupération des utilisateurs :', error);
-        const table = document.getElementById('userTable');
-        table.innerHTML = '<tr><td colspan="4">Erreur lors du chargement des utilisateurs.</td></tr>';
+        console.error('Erreur lors de la récupération des utilisateurs:', error);
       }
     }
 
-    // Valider un utilisateur
-    async function validerUtilisateur(id) {
+    async function validateUser(id) {
       try {
-        const response = await fetch('validate_user.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id })
-        });
+        const response = await fetch(`validate_user.php?id=${id}`, { method: 'GET' });
         const result = await response.json();
         if (result.success) {
-          afficherUtilisateurs();
+          alert('Utilisateur validé avec succès !');
+          fetchUsers();
         } else {
-          alert(result.error || 'Erreur lors de la validation.');
+          alert('Erreur : ' + result.message);
         }
       } catch (error) {
-        console.error('Erreur lors de la validation :', error);
+        console.error('Erreur lors de la validation de l\'utilisateur :', error);
+        alert('Une erreur est survenue. Veuillez réessayer.');
       }
     }
 
-    // Supprimer un utilisateur
-    async function supprimerUtilisateur(id) {
+    async function deleteUser(id) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) return;
+
       try {
-        const response = await fetch('delete_user.php', {
+        const response = await fetch('supprimer.php', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({ id })
         });
+
         const result = await response.json();
         if (result.success) {
-          afficherUtilisateurs();
+          alert('Donnée supprimée avec succès !');
+          fetchUsers();
         } else {
-          alert(result.error || 'Erreur lors de la suppression.');
+          alert('Erreur : ' + result.error);
         }
       } catch (error) {
         console.error('Erreur lors de la suppression :', error);
+        alert('Une erreur est survenue.');
       }
     }
 
-    afficherUtilisateurs();
+    fetchUsers();
   </script>
-
 </body>
 </html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Affichage des Données</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    button {
+      padding: 8px 12px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <h1>Affichage des Données</h1>
+
+  <label for="type">Sélectionner une table :</label>
+  <select id="type">
+    <option value="">-- Choisir --</option>
+    <option value="espece">Espèce</option>
+    <option value="foret">Forêt</option>
+    <option value="canton">Canton</option>
+    <option value="conservation">Conservation</option>
+    <option value="circonscription">Circonscription</option>
+    <option value="district">District</option>
+    <option value="agent">Agent</option>
+    <option value="analyste">Analyste</option>
+    <option value="analyse">Analyse</option>
+    <option value="operation">Opération</option>
+    <option value="donnee">Donnée</option>
+  </select>
+
+  <button id="loadData">Charger les données</button>
+
+  <table id="dataTable">
+    <thead>
+      <tr id="tableHeader"></tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <script>
+    document.getElementById('loadData').addEventListener('click', async () => {
+      const type = document.getElementById('type').value;
+      if (!type) {
+        alert('Veuillez sélectionner une table.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`fetch_data.php?type=${type}`);
+        const result = await response.json();
+
+        if (result.success) {
+          const data = result.data;
+          const tableHeader = document.getElementById('tableHeader');
+          const tableBody = document.getElementById('tableBody');
+
+          tableHeader.innerHTML = '';
+          tableBody.innerHTML = '';
+
+          if (data.length > 0) {
+            // Create table headers
+            Object.keys(data[0]).forEach(key => {
+              const th = document.createElement('th');
+              th.textContent = key;
+              tableHeader.appendChild(th);
+            });
+
+            // Populate table rows
+            data.forEach(row => {
+              const tr = document.createElement('tr');
+              Object.values(row).forEach(value => {
+                const td = document.createElement('td');
+                td.textContent = value;
+                tr.appendChild(td);
+              });
+
+              // Add delete button
+              const deleteTd = document.createElement('td');
+              const deleteButton = document.createElement('button');
+              deleteButton.textContent = 'Supprimer';
+              deleteButton.style.padding = '8px 12px';
+              deleteButton.style.backgroundColor = '#e74c3c';
+              deleteButton.style.color = 'white';
+              deleteButton.style.border = 'none';
+              deleteButton.style.borderRadius = '4px';
+              deleteButton.style.cursor = 'pointer';
+              deleteButton.addEventListener('click', () => deleteData(row.id));
+              deleteTd.appendChild(deleteButton);
+              tr.appendChild(deleteTd);
+
+              tableBody.appendChild(tr);
+            });
+          } else {
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.textContent = 'Aucune donnée trouvée';
+            td.colSpan = Object.keys(data[0] || {}).length || 1;
+            tr.appendChild(td);
+            tableBody.appendChild(tr);
+          }
+        } else {
+          alert('Erreur : ' + result.error);
+        }
+      } catch (error) {
+        alert('Erreur lors de la récupération des données.');
+      }
+    });
+
+    async function deleteData(id) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) return;
+
+      try {
+        const response = await fetch('supprimer.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ id })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          alert('Donnée supprimée avec succès !');
+          location.reload();
+        } else {
+          alert('Erreur : ' + result.error);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la suppression :', error);
+        alert('Une erreur est survenue.');
+      }
+    }
+  </script>
+</body>
+</html>

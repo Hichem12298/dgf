@@ -1,21 +1,30 @@
 <?php
 header('Content-Type: application/json');
-require 'db.php';
+require_once 'db.php';
 
-$data = json_decode(file_get_contents('php://input'), true);
+if (!isset($_GET['id'])) {
+    echo json_encode(["success" => false, "message" => "ID utilisateur manquant."]);
+    exit();
+}
 
-if (!empty($data['id'])) {
-    $userId = $data['id'];
+$id = intval($_GET['id']);
 
-    try {
-        $stmt = $pdo->prepare("UPDATE utilisateurs SET accepte = TRUE WHERE id = :id");
-        $stmt->execute([':id' => $userId]);
+try {
+    // Ensure the ID exists before updating
+    $checkStmt = $pdo->prepare("SELECT id FROM utilisateurs WHERE id = ?");
+    $checkStmt->execute([$id]);
 
-        echo json_encode(['success' => true, 'message' => 'Utilisateur validé avec succès.']);
-    } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'error' => 'Erreur : ' . $e->getMessage()]);
+    if ($checkStmt->rowCount() === 0) {
+        echo json_encode(["success" => false, "message" => "Aucun utilisateur trouvé avec cet ID."]);
+        exit();
     }
-} else {
-    echo json_encode(['success' => false, 'error' => 'ID utilisateur manquant.']);
+
+    // Update the 'accepte' field to 1
+    $stmt = $pdo->prepare("UPDATE utilisateurs SET accepte = 1 WHERE id = ?");
+    $stmt->execute([$id]);
+
+    echo json_encode(["success" => true, "message" => "Utilisateur validé avec succès."]);
+} catch (PDOException $e) {
+    echo json_encode(["success" => false, "message" => "Erreur de base de données : " . $e->getMessage()]);
 }
 ?>

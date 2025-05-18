@@ -1,33 +1,36 @@
 <?php
+require_once 'db.php';
+
 header('Content-Type: application/json');
-require 'db.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Récupérer les données du formulaire
-    $espece = $_POST['espece'] ?? null;
-    $diametre = $_POST['diametre'] ?? null;
-    $hauteur = $_POST['hauteur'] ?? null;
-    $localisation = $_POST['localisation'] ?? null;
+    $espece = $_POST['species'] ?? '';
+    $diametre = $_POST['diameter'] ?? 0;
+    $hauteur = $_POST['height'] ?? 0;
+    $localisation = $_POST['location'] ?? '';
+    $superficie = $_POST['superficie'] ?? 0;
 
-    // Ajouter des journaux pour vérifier les données reçues
-    error_log("Données reçues : " . json_encode($_POST));
-
-    // Vérifier si des champs sont manquants
-    if (!$espece || !$diametre || !$hauteur || !$localisation) {
-        error_log("Champs manquants : espece=$espece, diametre=$diametre, hauteur=$hauteur, localisation=$localisation");
+    if (empty($espece) || empty($diametre) || empty($hauteur) || empty($localisation) || empty($superficie)) {
         echo json_encode(['success' => false, 'message' => 'Tous les champs sont obligatoires.']);
         exit;
     }
 
     try {
-        // Insérer les données dans la table 'donnee'
-        $stmt = $pdo->prepare("INSERT INTO donnees_dendrometriques (espece, diametre, hauteur, localisation) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$espece, $diametre, $hauteur, $localisation]);
+        $sql = "INSERT INTO donnees_dendrometrique (espece, diametre, hauteur, localisation, superficie) VALUES (:espece, :diametre, :hauteur, :localisation, :superficie)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':espece' => $espece,
+            ':diametre' => $diametre,
+            ':hauteur' => $hauteur,
+            ':localisation' => $localisation,
+            ':superficie' => $superficie
+        ]);
 
         echo json_encode(['success' => true, 'message' => 'Donnée ajoutée avec succès.']);
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'message' => 'Erreur : ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Erreur lors de l\'ajout : ' . $e->getMessage()]);
     }
 } else {
     echo json_encode(['success' => false, 'message' => 'Méthode non autorisée.']);
 }
+?>

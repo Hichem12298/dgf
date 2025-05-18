@@ -2,112 +2,203 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Ajout Donnée Dendrométrique</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Espèces d'Arbres</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #e0f7fa, #80deea);
-            padding: 50px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
         }
-
-        h2 {
-            color: #004d40;
-            margin-bottom: 20px;
-        }
-
-        form {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
         }
-
-        input {
+        input, button {
             width: 100%;
-            padding: 12px 15px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            transition: border 0.3s;
-        }
-
-        input:focus {
-            border-color: #26a69a;
-            outline: none;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
+            padding: 8px;
             margin-top: 10px;
-            background-color: #00796b;
-            border: none;
-            border-radius: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
             color: white;
-            font-weight: bold;
+            border: none;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
-
         button:hover {
-            background-color: #004d40;
+            background-color: #45a049;
         }
-
-        .secondary-btn {
-            background-color: #546e7a;
+        table {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 20px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-
-        .secondary-btn:hover {
-            background-color: #37474f;
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .delete-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background-color: darkred;
         }
     </style>
 </head>
 <body>
 
-    <h2>Ajouter une donnée dendrométrique</h2>
+<div class="container">
+    <h2>Gestion des Espèces d'Arbres</h2>
+    
+    <form id="treeForm">
+        <label for="location">Localisation</label>
+        <input type="text" id="location" name="location" required placeholder="Entrez la localisation">
 
-    <form action="insert_dendometrique.php" method="POST">
-        <input type="text" name="espece" placeholder="Espèce de l'arbre" required>
-        <input type="number" step="0.01" name="diametre" placeholder="Diamètre (cm)" required>
-        <input type="number" step="0.01" name="hauteur" placeholder="Hauteur (m)" required>
-        <input type="text" name="localisation" placeholder="Localisation" required>
-        <button type="submit">Enregistrer</button>
+        <label for="species">Espèce</label>
+        <input type="text" id="species" name="species" required placeholder="Entrez l'espèce de l'arbre">
+
+        <label for="diameter">Diamètre (cm)</label>
+        <input type="number" id="diameter" name="diameter" required min="0">
+
+        <label for="height">Hauteur (m)</label>
+        <input type="number" id="height" name="height" required min="0">
+
+        <label for="superficie">Superficie (m²)</label>
+        <input type="number" id="superficie" name="superficie" required placeholder="Entrez la superficie">
+
+        <button type="submit">Sauvegarder</button>
     </form>
 
-    <button class="secondary-btn" onclick="window.location.href='voir_donnees.php'">Voir les données</button>
+    <h2>Liste des Espèces</h2>
+    <table id="treeTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Localisation</th>
+                <th>Espèce</th>
+                <th>Diamètre (cm)</th>
+                <th>Hauteur (m)</th>
+                <th>Superficie (m²)</th>
+                <th>Date d'enregistrement</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Les données seront insérées ici dynamiquement -->
+        </tbody>
+    </table>
+</div>
 
-    <script>
-        document.querySelector('form').addEventListener('submit', async function (e) {
-            e.preventDefault(); // Empêcher le rechargement de la page
+<script>
+document.getElementById("treeForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
 
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
+    const formData = new FormData(this);
 
-            try {
-                const response = await fetch('insert_dendometrique.php', {
-                    method: 'POST',
-                    body: formData // Envoyer les données directement sans JSON.stringify
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    alert('Donnée ajoutée avec succès !');
-                    this.reset(); // Réinitialiser le formulaire
-                } else {
-                    alert('Erreur : ' + result.message);
-                }
-            } catch (error) {
-                console.error('Erreur lors de l\'envoi des données :', error);
-                alert('Une erreur est survenue. Veuillez réessayer.');
-            }
+    try {
+        const response = await fetch('insert_dendometrique.php', {
+            method: 'POST',
+            body: formData
         });
-    </script>
+
+        const result = await response.json();
+        if (result.success) {
+            alert('Donnée ajoutée avec succès !');
+            this.reset();
+            loadDendrometricData(); // Reload data after successful insertion
+        } else {
+            alert('Erreur : ' + result.message);
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'envoi des données :', error);
+        alert('Une erreur est survenue. Veuillez réessayer.');
+    }
+});
+
+async function loadDendrometricData() {
+    try {
+        const response = await fetch('fetch_data.php?type=donnees_dendrometrique');
+        const result = await response.json();
+
+        if (result.success) {
+            const data = result.data;
+            const tableBody = document.querySelector('#treeTable tbody');
+
+            // Clear existing rows
+            tableBody.innerHTML = '';
+
+            // Populate table with data
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.id}</td>
+                    <td>${row.localisation}</td>
+                    <td>${row.espece}</td>
+                    <td>${row.diametre}</td>
+                    <td>${row.hauteur}</td>
+                    <td>${row.superficie}</td>
+                    <td>${row.date_enregistrement}</td>
+                    <td><button class="delete-btn" onclick="deleteData(${row.id})">Supprimer</button></td>`;
+                tableBody.appendChild(tr);
+            });
+        } else {
+            alert('Erreur : ' + result.error);
+        }
+    } catch (error) {
+        console.error('Erreur lors du chargement des données :', error);
+        alert('Impossible de charger les données.');
+    }
+}
+
+async function deleteData(id) {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) return;
+
+  try {
+    const response = await fetch('supprimer.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      alert('Donnée supprimée avec succès !');
+      loadDendrometricData(); // Reload data after successful deletion
+    } else {
+      alert('Erreur : ' + result.error);
+    }
+  } catch (error) {
+    console.error('Erreur lors de la suppression :', error);
+    alert('Une erreur est survenue.');
+  }
+}
+
+// Load data on page load
+window.onload = loadDendrometricData;
+</script>
 
 </body>
 </html>

@@ -111,7 +111,7 @@
 
     let lastData = JSON.parse(localStorage.getItem('surveillanceData')) || {};
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       // Récupérer les données du formulaire
@@ -122,35 +122,30 @@
       const speciesArea = document.getElementById('speciesArea').value;
       const speciesDate = document.getElementById('speciesDate').value;
 
-      const currentData = {
-        speciesName,
-        speciesLocation,
-        speciesHeight,
-        speciesWidth,
-        speciesArea,
-        speciesDate,
-      };
+      const formData = new FormData();
+      formData.append('speciesName', speciesName);
+      formData.append('speciesLocation', speciesLocation);
+      formData.append('speciesHeight', speciesHeight);
+      formData.append('speciesWidth', speciesWidth);
+      formData.append('speciesArea', speciesArea);
+      formData.append('speciesDate', speciesDate);
 
-      // Vérifier si les données ont changé
-      let hasChanged = false;
-      for (let key in currentData) {
-        if (currentData[key] !== (lastData[key] || '')) {
-          hasChanged = true;
-          break;
+      try {
+        const response = await fetch('insert_surveillance.php', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          alert('Données enregistrées avec succès !');
+          form.reset();
+        } else {
+          alert('Erreur : ' + result.message);
         }
-      }
-
-      if (hasChanged) {
-        // Afficher la notification
-        notification.style.display = 'block';
-
-        // Enregistrer les nouvelles données dans le localStorage
-        localStorage.setItem('surveillanceData', JSON.stringify(currentData));
-      }
-
-      // Si les données n'ont pas changé
-      else {
-        alert('Aucune modification détectée.');
+      } catch (error) {
+        console.error('Erreur lors de l\'envoi des données :', error);
+        alert('Une erreur est survenue. Veuillez réessayer.');
       }
     });
   </script>

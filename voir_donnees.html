@@ -1,103 +1,146 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Données Dendrométriques Enregistrées</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #ecf0f1;
-            padding: 20px;
-            color: #2c3e50;
-        }
-
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 25px;
-            background-color: white;
-        }
-
-        th, td {
-            padding: 12px;
-            border: 1px solid #bdc3c7;
-            text-align: center;
-        }
-
-        th {
-            background-color: #2c3e50;
-            color: white;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        .back-btn {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 15px;
-            background-color: #27ae60;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-        .back-btn:hover {
-            background-color: #2ecc71;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voir Données Dendrométriques</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .back-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 15px;
+      background-color: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      text-align: center;
+    }
+    .back-btn:hover {
+      background-color: #2980b9;
+    }
+    button {
+      padding: 8px 12px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #c0392b;
+    }
+  </style>
 </head>
 <body>
+  <h1>Données Dendrométriques</h1>
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Espèce</th>
+        <th>Diamètre (cm)</th>
+        <th>Hauteur (m)</th>
+        <th>Localisation</th>
+        <th>Date d'enregistrement</th>
+        <th>Superficie (m²)</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Les données seront insérées ici par JavaScript -->
+    </tbody>
+  </table>
+  <a href="public.html" class="back-btn">Retour</a>
+  <script>
+    async function deleteData(id) {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer cet élément ?')) return;
 
-    <h1>Données Dendrométriques Enregistrées</h1>
-
-    <table id="dataTable">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Espèce</th>
-                <th>Diamètre (cm)</th>
-                <th>Hauteur (m)</th>
-                <th>Localisation</th>
-                <th>Date d'enregistrement</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Les données seront insérées ici par JavaScript -->
-        </tbody>
-    </table>
-
-    <a href="ajout.html" class="back-btn">Retour</a>
-
-    <script>
-        fetch('lire_donnees.php')
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.querySelector('#dataTable tbody');
-                data.forEach(row => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${row.id}</td>
-                        <td>${row.species}</td>
-                        <td>${row.diameter}</td>
-                        <td>${row.height}</td>
-                        <td>${row.location}</td>
-                        <td>${row.date_enregistrement}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            })
-            .catch(error => {
-                console.error('Erreur lors de la récupération des données:', error);
-                alert('Impossible de charger les données.');
+        try {
+            const response = await fetch('voir_donnees.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: 'delete', id })
             });
-    </script>
 
+            const result = await response.json();
+            if (result.success) {
+                alert('Donnée supprimée avec succès !');
+                fetchData(); // Recharger les données après suppression
+            } else {
+                alert('Erreur : ' + result.error);
+            }
+        } catch (error) {
+            console.error('Erreur lors de la suppression :', error);
+            alert('Une erreur est survenue.');
+        }
+    }
+
+    async function fetchData() {
+      try {
+        const response = await fetch('voir_donnees.php');
+        const result = await response.json();
+
+        if (result.success) {
+          const data = result.data;
+          const tbody = document.querySelector('#dataTable tbody');
+          tbody.innerHTML = '';
+
+          data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${row.id}</td>
+              <td>${row.espece}</td>
+              <td>${row.diametre}</td>
+              <td>${row.hauteur}</td>
+              <td>${row.localisation}</td>
+              <td>${row.date_enregistrement}</td>
+              <td>${row.superficie}</td>
+              <td><button onclick="deleteData(${row.id})">Supprimer</button></td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          alert('Erreur : ' + result.error);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des données :', error);
+        alert('Impossible de charger les données.');
+      }
+    }
+
+    // Charger les données au chargement de la page
+    window.onload = fetchData;
+  </script>
 </body>
 </html>

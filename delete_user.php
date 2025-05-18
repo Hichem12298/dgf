@@ -2,20 +2,23 @@
 header('Content-Type: application/json');
 require 'db.php';
 
-$data = json_decode(file_get_contents('php://input'), true);
+if (!isset($_GET['id'])) {
+    echo json_encode(["success" => false, "message" => "ID utilisateur manquant."]);
+    exit();
+}
 
-if (!empty($data['id'])) {
-    $userId = $data['id'];
+$id = intval($_GET['id']);
 
-    try {
-        $stmt = $pdo->prepare("DELETE FROM utilisateurs WHERE id = :id");
-        $stmt->execute([':id' => $userId]);
+try {
+    $stmt = $pdo->prepare("DELETE FROM utilisateurs WHERE id = ?");
+    $stmt->execute([$id]);
 
-        echo json_encode(['success' => true, 'message' => 'Utilisateur supprimé avec succès.']);
-    } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'error' => 'Erreur : ' . $e->getMessage()]);
+    if ($stmt->rowCount() > 0) {
+        echo json_encode(["success" => true, "message" => "Utilisateur supprimé avec succès."]);
+    } else {
+        echo json_encode(["success" => false, "message" => "Aucun utilisateur trouvé avec cet ID."]);
     }
-} else {
-    echo json_encode(['success' => false, 'error' => 'ID utilisateur manquant.']);
+} catch (PDOException $e) {
+    echo json_encode(["success" => false, "message" => "Erreur de base de données : " . $e->getMessage()]);
 }
 ?>
