@@ -1,56 +1,100 @@
-<script>
-  // Fonction qui ajuste l'interface en fonction du rôle de l'utilisateur
-  function chargerInterfaceUtilisateur(user) {
-    const menu = document.getElementById('menuButtons');
-    menu.innerHTML = ''; // Nettoyer les boutons existants
-    
-    switch (user.role) {
-      case 'admin':
-        menu.innerHTML += `
-          <button onclick="location.href='admin.html'">Gérer les utilisateurs</button>
-          <button onclick="location.href='ajouter.html'">Ajouter un utilisateur</button>
-        `;
-        break;
-      case 'agent':
-        menu.innerHTML += `
-          <button onclick="location.href='dendometrique.html'">Entrer les Données</button>
-          <button onclick="location.href='contact.html'">Contact</button>
-        `;
-        break;
-      case 'analyste':
-        menu.innerHTML += `
-          <button onclick="location.href='analyse.html'">Analyser les Données</button>
-          <button onclick="location.href='contact.html'">Contact</button>
-        `;
-        break;
-      case 'conservation':
-        menu.innerHTML += `
-          <button onclick="location.href='ajout.html'">Ajouter Entité</button>
-          <button onclick="location.href='contact.html'">Contact</button>
-        `;
-        break;
-      case 'surveillance':
-        menu.innerHTML += `
-          <button onclick="location.href='surveillance.html'">Surveillance</button>
-          <button onclick="location.href='contact.html'">Contact</button>
-        `;
-        break;
-      case 'public':
-        menu.innerHTML += `
-          <button onclick="location.href='contact.html'">Contact</button>
-          <button onclick="location.href='voir_donnees.html'">Consulter les Données</button>
-        `;
-        break;
-      default:
-        console.error('Rôle inconnu :', user.role);
-        alert('Rôle inconnu. Veuillez contacter l\'administrateur.');
-        break;
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Menu Dynamique par Rôle</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
     }
-  }
-  
-  // Exemple d'utilisation :
-  // Supposons que "user" soit un objet récupéré après connexion.
-  // Par exemple : 
-  // const user = { email: 'agent@example.com', role: 'agent' };
-  // chargerInterfaceUtilisateur(user);
-</script>
+
+    .button-container {
+      margin-top: 20px;
+    }
+
+    button {
+      display: block;
+      margin: 10px 0;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      width: 250px;
+      text-align: left;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    label {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Choisir un rôle</h2>
+
+  <label for="role">Sélectionnez un rôle :</label>
+  <select id="role" onchange="afficherBoutons()">
+    <option value="">-- Choisir un rôle --</option>
+    <option value="administrateur">Administrateur</option>
+    <option value="agent">Agent de récolte</option>
+    <option value="analyste">Analyste</option>
+    <option value="conservation">Agent de conservation</option>
+    <option value="public">Public</option>
+  </select>
+
+  <div class="button-container" id="boutons"></div>
+
+  <script>
+    function afficherBoutons() {
+      const role = document.getElementById("role").value;
+      const container = document.getElementById("boutons");
+
+      // Vider les anciens boutons
+      container.innerHTML = "";
+
+      switch (role) {
+        case 'agent':
+          container.innerHTML = `
+            <button onclick="location.href='dendometrique.html'">Entrer les Données</button>
+            <button onclick="location.href='contact.html'">Contact</button>
+          `;
+          break;
+        case 'analyste':
+          container.innerHTML = `
+            <button onclick="location.href='analyse.html'">Analyser les Données</button>
+            <button onclick="location.href='contact.html'">Contact</button>
+          `;
+          break;
+        case 'conservation':
+          container.innerHTML = `
+            <button onclick="location.href='ajout.html'">Ajouter Entité</button>
+            <button onclick="location.href='contact.html'">Contact</button>
+          `;
+          break;
+        case 'administrateur':
+          container.innerHTML = `
+            <button onclick="location.href='admin_utilisateurs.html'">Gérer les utilisateurs</button>
+            <button onclick="location.href='contact.html'">Contact</button>
+          `;
+          break;
+        case 'public':
+          container.innerHTML = `
+            <button onclick="location.href='voir_donnees.html'">Consulter les Données</button>
+            <button onclick="location.href='contact.html'">Contact</button>
+          `;
+          break;
+        default:
+          container.innerHTML = "";
+      }
+    }
+  </script>
+
+</body>
+</html>
