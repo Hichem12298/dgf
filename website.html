@@ -3,60 +3,117 @@
 <head>
   <meta charset="UTF-8">
   <title>Menu Dynamique par Rôle</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 20px;
     }
 
-    .button-container {
-      margin-top: 20px;
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      color: #fff;
     }
 
-    button {
-      display: block;
-      margin: 10px 0;
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      background-color: #4CAF50;
-      color: white;
-      cursor: pointer;
-      width: 250px;
-      text-align: left;
-    }
-
-    button:hover {
-      background-color: #45a049;
+    h2 {
+      margin-bottom: 20px;
+      font-size: 28px;
+      color: #ffffff;
     }
 
     label {
+      display: block;
+      margin-bottom: 10px;
       font-weight: bold;
+      text-align: left;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background-color: #ffffffdd;
+      font-size: 16px;
+      margin-bottom: 20px;
+      transition: background 0.3s ease;
+    }
+
+    select:hover {
+      background-color: #eeeeee;
+    }
+
+    .button-container button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background: #4CAF50;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      transition: transform 0.2s ease, background 0.3s ease;
+      cursor: pointer;
+    }
+
+    .button-container button:hover {
+      background-color: #43a047;
+      transform: scale(1.02);
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 20px;
+      }
+
+      h2 {
+        font-size: 24px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <h2>Choisir un rôle</h2>
+  <div class="card">
+    <h2>Choisissez votre rôle</h2>
 
-  <label for="role">Sélectionnez un rôle :</label>
-  <select id="role" onchange="afficherBoutons()">
-    <option value="">-- Choisir un rôle --</option>
-    <option value="administrateur">Administrateur</option>
-    <option value="agent">Agent de récolte</option>
-    <option value="analyste">Analyste</option>
-    <option value="conservation">Agent de conservation</option>
-    <option value="public">Public</option>
-  </select>
+    <label for="role">Rôle :</label>
+    <select id="role" onchange="afficherBoutons()">
+      <option value="">-- Sélectionner --</option>
+      <option value="administrateur">Administrateur</option>
+      <option value="agent">Agent de récolte</option>
+      <option value="analyste">Analyste</option>
+      <option value="conservation">Agent de conservation</option>
+      <option value="public">Public</option>
+    </select>
 
-  <div class="button-container" id="boutons"></div>
+    <div class="button-container" id="boutons"></div>
+  </div>
 
   <script>
     function afficherBoutons() {
       const role = document.getElementById("role").value;
       const container = document.getElementById("boutons");
 
-      // Vider les anciens boutons
       container.innerHTML = "";
 
       switch (role) {
@@ -76,6 +133,7 @@
           container.innerHTML = `
             <button onclick="location.href='ajout.html'">Ajouter Entité</button>
             <button onclick="location.href='contact.html'">Contact</button>
+            <button onclick="location.href='login.html'">Login Conservation</button>
           `;
           break;
         case 'administrateur':
